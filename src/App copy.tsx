@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { image } from "./image";
-import { Line } from "./entities/Line";
 import "./App.css";
 import { SVG, Timeline } from "@svgdotjs/svg.js";
 import "@svgdotjs/svg.filter.js";
@@ -42,43 +41,62 @@ function App() {
       } as any).update(0, "#3A4A66" as any, 1);
     });
 
-    draw.rect().size("100%", "100%").fill(backgroundGradient);
+    const background = draw
+      .rect()
+      .size("100%", "100%")
+      .fill(backgroundGradient);
 
-    const lines = [];
-    for (let i = 0; i < 30; i++) {
-      lines.push(
-        new Line({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-        }).generatePath()
-      );
-    }
+    // draw.svg(`<defs>
 
-    // const allLines = [
-    //   ...generateAllLines(),
-    //   // ...generateAllLines(90, 1),
-    //   // ...generateAllLines(180, 0.5),
-    //   // ...generateAllLines(-90, 1),
-    // ];
+    //   <!-- a glow that takes on the stroke color of the object it's applied to -->
+    //   <filter id="strokeGlow" y="-10" x="-10" width="100" height="100">
 
-    lines.forEach((line) => {
-      // console.log(start, segments);
-      // let { x, y } = start;
-      // const builder = new Builder();
-      // const path = builder.moveTo(x, y);
+    //     <feOffset in="StrokePaint" dx="0" dy="0" result="centeredOffset"></feOffset>
 
-      // segments.forEach((segment) => {
-      //   path.lineToRel(segment.x, segment.y);
-      //   x += segment.x;
-      //   y += segment.y;
-      // });
+    //     <feGaussianBlur in="centeredOffset" stdDeviation="2" result="blur1"></feGaussianBlur>
+    //     <feGaussianBlur in="centeredOffset" stdDeviation="5" result="blur2"></feGaussianBlur>
+    //     <feGaussianBlur in="centeredOffset" stdDeviation="15" result="blur3"></feGaussianBlur>
 
-      const svgLine = draw.path(line).fill("none").stroke("#FF9425");
+    //     <feMerge>
+    //       <!-- this contains the offset blurred image -->
+    //       <feMergeNode in="blur1"></feMergeNode>
+    //       <feMergeNode in="blur2"></feMergeNode>
+    //       <feMergeNode in="blur3"></feMergeNode>
+
+    //       <!-- this contains the element that the filter is applied to -->
+    //       <feMergeNode in="SourceGraphic"></feMergeNode>
+    //     </feMerge>
+    //   </filter>
+
+    // </defs>`);
+
+    const allLines = [
+      ...generateAllLines(),
+      // ...generateAllLines(90, 1),
+      // ...generateAllLines(180, 0.5),
+      // ...generateAllLines(-90, 1),
+    ];
+
+    allLines.forEach(({ start, segments, width, circleIsFill }) => {
+      console.log(start, segments);
+      let { x, y } = start;
+      const builder = new Builder();
+      const path = builder.moveTo(x, y);
+
+      segments.forEach((segment) => {
+        path.lineToRel(segment.x, segment.y);
+        x += segment.x;
+        y += segment.y;
+      });
+
+      const svgLine = draw.path(path.end()).fill("none").stroke("#FF9425");
       svgLine.attr({
-        "stroke-width": 1,
+        "stroke-width": width,
         "stroke-dasharray": svgLine.length(),
         "stroke-dashoffset": svgLine.length(),
       });
+
+      // svgLine.rotate(rotation, window.innerWidth / 2, window.innerHeight / 2);
 
       const drawAnimDuration = getRndInteger(6000, 10000);
       svgLine.timeline(timeline);
@@ -92,6 +110,49 @@ function App() {
         .attr({
           "stroke-dashoffset": 0,
         });
+
+      // setTimeout(() => {
+      //   svgLine.attr({
+      //     filter: 'url("#strokeGlow")',
+      //   });
+      // }, 5000);
+
+      // TODO: center non fill circle with segments depending last direction
+      // const lastDirection = segments[segments.length -1].direction;
+      // console.log(lastDirection);
+      // const circleSize = width * 4 + 5;
+      // const circle = draw
+      //   .circle(circleIsFill ? 0 : circleSize)
+      //   .center(x, circleIsFill ? y : y - circleSize / 2)
+      //   .rotate(rotation, window.innerWidth / 2, window.innerHeight / 2)
+      //   .fill(circleIsFill ? ORANGE : "none")
+      //   .stroke(circleIsFill ? "none" : ORANGE)
+      //   .attr({
+      //     "stroke-width": width,
+      //     ...(!circleIsFill
+      //       ? {
+      //           "stroke-dasharray": 50,
+      //           "stroke-dashoffset": 50,
+      //         }
+      //       : {}),
+      //   });
+
+      // circle
+      //   .animate({
+      //     ease: "<",
+      //     duration: 500,
+      //     when: "now",
+      //     delay: 1300 + drawAnimDuration,
+      //   } as any)
+      //   .attr({
+      //     ...(circleIsFill
+      //       ? {
+      //           r: circleSize / 2,
+      //         }
+      //       : {
+      //           "stroke-dashoffset": 0,
+      //         }),
+      //   });
     });
 
     draw.svg(cpu.svg);

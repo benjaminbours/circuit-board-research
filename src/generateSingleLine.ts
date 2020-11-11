@@ -2,15 +2,22 @@ import { Direction, Coordinates } from "./types";
 import { getRndInteger } from "./utils";
 import { generateSegmentDirection } from "./generateSegmentDirection";
 
-export function generateSingleLine(start: Coordinates, lengthRatio: number) {
+export function generateSingleLine() {
+  // generate random point in the window height but out of the window width
   const startingPoint = {
-    x: window.innerWidth / 2 + start.x,
-    y: window.innerHeight / 2 + start.y,
+    x: [0 - 10, window.innerWidth + 10][getRndInteger(0, 1)],
+    y: getRndInteger(0, window.innerHeight),
   };
 
-  let lengthCount = startingPoint.y * lengthRatio;
+  const endPoint = {
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+  };
+
+  let lengthCount = getRndInteger(100, 800);
+  const minLengthCount = 50;
   const segments = [];
-  while (lengthCount > 50) {
+  while (lengthCount > minLengthCount) {
     const segmentLength = getRndInteger(25, 200);
     const previousSegment = segments[segments.length - 1];
 
@@ -47,19 +54,51 @@ export function generateSingleLine(start: Coordinates, lengthRatio: number) {
       return coordinates;
     };
 
+    const segment = applyDirection();
+
+    // console.log("PREVIOUS SEGMENT", previousSegment);
+    // console.log(difCoordinates);
+    const previousDistanceFromEndPoint = (() => {
+      if (!previousSegment) {
+        return undefined;
+      }
+      const difCoordinates: Coordinates = {
+        x: previousSegment.x - endPoint.x,
+        y: previousSegment.y - endPoint.y,
+      };
+      return Math.sqrt(
+        Math.pow(difCoordinates.x, 2) + Math.pow(difCoordinates.y, 2)
+      );
+    })();
+
+    const distanceFromEndPoint = (() => {
+      const difCoordinates: Coordinates = {
+        x: segment.x - endPoint.x,
+        y: segment.y - endPoint.y,
+      };
+      return Math.sqrt(
+        Math.pow(difCoordinates.x, 2) + Math.pow(difCoordinates.y, 2)
+      );
+    })();
+
+    console.log("previous", previousDistanceFromEndPoint);
+    console.log("current", distanceFromEndPoint);
+
     segments.push({
-      ...applyDirection(),
+      ...segment,
       direction: segmentDirection,
+      // distanceFromEndPoint,
     });
 
     lengthCount -= segmentLength;
   }
-  console.log(segments);
+  // console.log(segments);
 
   return {
     start: startingPoint,
+    end: endPoint,
     segments,
-    width: getRndInteger(1, 3),
+    width: 1.5,
     circleIsFill: getRndInteger(0, 1) ? true : false,
   };
 }

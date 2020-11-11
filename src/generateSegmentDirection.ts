@@ -5,9 +5,13 @@ export function generateSegmentDirection(
   previousSegment: Segment | undefined
 ): Direction {
   if (!previousSegment) {
-    return Direction.TOP;
+    // if no previous segment return of the direction randomly
+    return getRndInteger(0, 7);
   }
 
+  // console.log(previousSegment.distanceFromEndPoint);
+
+  // defines the directions in which the segment can go
   let options: Direction[];
   switch (previousSegment.direction) {
     case Direction.TOP:
@@ -35,5 +39,6 @@ export function generateSegmentDirection(
       options = [Direction.BOTTOM_RIGHT, Direction.BOTTOM_LEFT];
       break;
   }
+  // return randomly one of the possible direction
   return options[getRndInteger(0, options.length - 1)];
 }

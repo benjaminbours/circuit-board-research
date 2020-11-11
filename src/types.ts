@@ -5,6 +5,7 @@ export interface Coordinates {
 
 export interface Segment extends Coordinates {
   direction: Direction;
+  // distanceFromEndPoint: number | undefined;
 }
 
 export enum Direction {
